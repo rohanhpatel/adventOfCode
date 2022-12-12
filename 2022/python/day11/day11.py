@@ -1,13 +1,14 @@
 import sys
 import os
 import math
+from dill.source import getsource
 
 class Monkey:
-    def __init__(self, number, itemList, operation, testParams):
-        self.num = number
-        self.items = itemList
-        self.op = operation
-        self.params = testParams 
+    def __init__(self, params):
+        self.num = params['num']
+        self.items = params['items']
+        self.op = params['op']
+        self.params = params['test_params']
     def throw(self):
         return self.items.pop(0)
     def catch(self, it):
@@ -19,53 +20,62 @@ class Monkey:
         else:
             return m2
     def inspect(self):
-        old = self.items[0]
         # divide the worry level by 3
+        old = self.items[0]
         self.items[0] = int(eval(self.op)/3)
     def r_inspect(self): # for part 2
         old = self.items[0]
-        self.items[0] = eval(self.op)
+        self.items[0] = int(eval(self.op))
     def value(self):
         return self.num
+    def __str__(self):
+        string = ""
+        string += "Monkey " + str(self.value()) + ":" + '\n'
+        string += "Items: " + ", ".join([str(x) for x in self.items]) + "\n"
+        string += "Operation: new = " + self.op  + "\n"
+        string += "Test parameters: " + ", ".join([str(x) for x in self.params]) + "\n"
+        return string
 
 def parseFile(f):
     inpFile = open(f, 'r')
     allMonkeys = list()
-    monkParam = list()
+    monkParams = dict()
     testParams = list()
     for line in inpFile:
         actLine = line.strip().split(":")
         if actLine[0][0:6] == 'Monkey':
             monkeySplit = actLine[0].split(" ")
-            monkParam.append(int(monkeySplit[-1]))
+            monkParams['num'] = int(monkeySplit[-1])
         elif actLine[0] == "Starting items":
             monkItems = list()
             listItems = actLine[1].split(",")
             for item in listItems:
                 monkItems.append(int(item))
-            monkParam.append(monkItems)
+            monkParams['items'] = monkItems
         elif actLine[0] == "Operation":
-            monkOp = actLine[1].strip()[5:]
-            monkParam.append(monkOp)
+            expression = actLine.copy()[1].strip()[6:]
+            monkParams['op'] = expression
         elif actLine[0] == "Test":
             divNum = actLine[1].strip()[12:]
             testParams.append(int(divNum))
         elif actLine[0] == "If true":
-            monkTrueNum = actLine[1].strip()[15:]
+            monkTrueNum = actLine[1].split(" ")[-1]
             testParams.append(int(monkTrueNum))
         elif actLine[0] == "If false":
-            monkFalseNum = actLine[1].strip()[15:]
+            monkFalseNum = actLine[1].split(" ")[-1]
             testParams.append(int(monkFalseNum))
-            monkParam.append(testParams.copy())
-            monkey = Monkey(monkParam[0], monkParam[1], monkParam[2], monkParam[3])
+            monkParams['test_params'] = testParams.copy()
+            monkey = Monkey(monkParams.copy())
             allMonkeys.append(monkey)
-            monkParam = list()
+            monkParams = dict()
             testParams = list()
+#    for monkey in allMonkeys:
+#        print(monkey)
     return allMonkeys
 
 def throwMTM(m1, m2):
-   item = m1.throw()
-   m2.catch(item)
+    item = m1.throw()
+    m2.catch(item)
 
 def part1():
     allMonkeys = parseFile(sys.argv[1])
@@ -86,7 +96,7 @@ def part1():
                         target = trgt
                         break
                 throwMTM(monkey, trgt)
-    inspectCount.sort(reverse = True)
+    inspectCount.sort(reverse = True) 
     print("Monkey business: " + str(inspectCount[0] * inspectCount[1]))
 
 def part2():
@@ -100,7 +110,8 @@ def part2():
             initLen = len(monkey.items)
             if initLen > 0:
                 inspectCount[m] += initLen
-            for _ in range(initLen):
+            for i in range(initLen):
+#                print("On monkey " + str(monkey.value()) + " and item " + str(i))
                 monkey.r_inspect()
                 mNum = monkey.test()
                 target = None
@@ -109,8 +120,7 @@ def part2():
                         target = trgt
                         break
                 throwMTM(monkey, trgt)
-        if r % 500 == 0:
-            print(r)
+#        print(r)
     inspectCount.sort(reverse = True)
     print("Monkey business: " + str(inspectCount[0] * inspectCount[1]))
 
