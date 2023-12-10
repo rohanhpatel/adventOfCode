@@ -3,6 +3,25 @@ import os
 import math
 from dill.source import getsource
 
+def manualModulo(div, bigNum):
+    num = bigNum
+    while num > div:
+        power = int(math.log(num, div))
+        powNum = int(math.pow(div, power))
+        while num >= powNum:
+            num -= powNum
+    return num == 0 
+
+def recurMod(num, mod):
+    if num < 10:
+        return num % mod 
+    else:
+        lead = int(str(num)[0])
+        rest = int(str(num)[1:])
+        val1 = (lead % mod) * 10
+        val2 = recurMod(rest, mod)
+        return (val1 + val2) % mod
+
 class Monkey:
     def __init__(self, params):
         self.num = params['num']
@@ -97,6 +116,7 @@ def part1():
                         break
                 throwMTM(monkey, trgt)
     inspectCount.sort(reverse = True) 
+    print(inspectCount)
     print("Monkey business: " + str(inspectCount[0] * inspectCount[1]))
 
 def part2():
@@ -137,4 +157,9 @@ def main():
     else:
         print("Not a valid part")
 
+#print(manualModulo(23, 48))
+#print(manualModulo(23, 46))
+#print(manualModulo(23, 1801159097806))
+#print("recursive mod")
+#print(recurMod(23, 1801159097806) % 23)
 main()
