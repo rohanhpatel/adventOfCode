@@ -140,7 +140,7 @@ def part2():
                         target = trgt
                         break
                 throwMTM(monkey, trgt)
-        if r % 250 == 0:
+        if r % 500 == 0:
             print(r)
     inspectCount.sort(reverse = True)
     print("Monkey business: " + str(inspectCount[0] * inspectCount[1]))
