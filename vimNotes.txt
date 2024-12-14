@@ -1,0 +1,1 @@
+Hold shift while pressing " and *, then let go and press p to paste text from clipboard (Windows)
